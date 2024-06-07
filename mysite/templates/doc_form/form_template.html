@@ -1,0 +1,57 @@
+<!-- form_template.html -->
+
+
+{% extends 'doc_form/base.html' %}
+{% block title %}Formularz{% endblock %}
+{% block content %}
+<!-- Dodaj link do pliku CSS Bootstrap -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container">
+    <h2>Formularz wypełnienia pliku: <b>{{ file_name }}</b></h2>
+    <form class="form-with-validation needs-validation" method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form_data.fields %}
+        <div class="form-group">
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            {% if field.type == "textarea" %}
+            <textarea class="form-control" id="{{ field.name }}" name="{{ field.name }}" rows="4" cols="50" required></textarea>
+            <div class="invalid-feedback">To pole jest wymagane.</div>
+            {% else %}
+            <input type="{{ field.type }}" class="form-control" id="{{ field.name }}" name="{{ field.name }}" {% if field.pattern %}pattern="{{ field.pattern }}"{% endif %} required>
+            <div class="invalid-feedback">
+                {% if field.type == "email" %}
+                Wprowadź poprawny adres e-mail.
+                {% elif field.type == "number" %}
+                Wprowadź poprawną liczbę.
+                {% else %}
+                To pole jest wymagane.
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Generuj</button>
+    </form>
+</div>
+
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the form element
+        var form = document.querySelector('.form-with-validation');
+
+        // Add event listener for form submission
+        form.addEventListener('submit', function(event) {
+            // Check if the form is valid
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Add the was-validated class to the form to show validation feedback
+            form.classList.add('was-validated');
+        }, false);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'doc_form/base.html' %}
+{% block title %}Edytuj dokument{% endblock %}
+
+{% block content %}
+{% load static %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<div class="container mt-5">
+    <h2>Edytuj dokument</h2>
+    <form class="form-with-validation" method="post" id="rubric_form" enctype="multipart/form-data" novalidate>
+        <div id="rubric_fields">
+            {% csrf_token %}
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Nazwa pliku:</span>
+                <input type="text" class="form-control" id="title" name="title" value="{{ existing_doc.file_name }}" required>
+                <div class="invalid-feedback">To pole jest wymagane.</div>
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Opis pliku:</span>
+                <textarea class="form-control" id="describe" name="describe"  rows="4" cols="50" required>{{ existing_doc.file_describe }}</textarea>
+                <div class="invalid-feedback">To pole jest wymagane.</div>
+            </div>
+            <div class="form-group">
+                <label for="doc_file"><img style="width: 4vh;" src="{% static 'images/image.png' %}" alt="ms-word"> Plik o rozszerzeniu <b>.docs</b>:</label>
+                <input type="file" class="btn btn-secondary form-control-file" id="doc_file" name="doc_file">
+            </div>
+            <!-- Wyświetl istniejące rubryki i ich typy -->
+            
+                {% for field in existing_doc.json_content.fields %}
+                <div class="form-group">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Nazwa rubryki</span>
+                        <input type="text" class="form-control" id="label_{{ forloop.counter0 }}" name="label_{{ forloop.counter0 }}" value="{{ field.label }}" required>
+                        <div class="invalid-feedback">To pole jest wymagane.</div>
+                    </div>
+                    
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon3">Typ danych:</span>
+                        <select class="form-control" id="type_{{ forloop.counter0 }}" name="type_{{ forloop.counter0 }}">
+                            <option value="text" {% if field.type == 'text' %}selected{% endif %}>Krótki tekst</option>
+                            <option value="textarea" {% if field.type == 'textarea' %}selected{% endif %}>Długi tekst</option>
+                            <option value="email" {% if field.type == 'email' %}selected{% endif %}>Email</option>
+                            <option value="number" {% if field.type == 'number' %}selected{% endif %}>Numer</option>
+                            <option value="date" {% if field.type == 'date' %}selected{% endif %}>Data</option>
+                            <!-- Dodaj więcej typów rubryk w razie potrzeby -->
+                        </select>
+                    </div>
+                <hr>
+            </div>
+            {% endfor %}
+            
+        </div>
+            <button type="button" class="btn btn-primary mb-3" id="add_rubric">Dodaj kolejną rubrykę</button>
+            <button type="button" class="btn btn-danger mb-3" id="remove_rubric" {% if existing_doc.json_content.fields|length <= 1 %}style="display: none;"{% endif %}>Usuń rubrykę</button>
+            <br>
+            <input type="submit" class="btn btn-success" value="Zapisz zmiany">
+       
+    </form>
+</div>
+
+<script>
+    // Obsługa dodawania kolejnych rubryk
+    var labelFields = document.querySelectorAll('input[id^="label_"]');
+    // Policzenie liczby znalezionych pól etykiet
+    var labelFieldsCount = labelFields.length+1;
+    var rubric_count = labelFieldsCount;
+    $(document).on('click', '#add_rubric', function() {
+        var new_rubric = '<div class="form-group">'+
+                            '<div class="input-group mb-3">'+
+                                '<span class="input-group-text" id="basic-addon1">Nazwa rubryki</span>'+
+                                '<input type="text" class="form-control" id="label_'+rubric_count+'" name="label_'+rubric_count+'" required>'+
+                                '<div class="invalid-feedback">To pole jest wymagane.</div>'+
+                            '</div>'+
+                            
+                                '<div class="input-group mb-3">'+
+                                '<span class="input-group-text" id="basic-addon3">Typ danych:</span>'+
+                                '<select class="form-control" id="type_'+rubric_count+'" name="type_'+rubric_count+'">'+
+                                    '<option value="text">Krótki tekst</option>'+
+                                    '<option value="textarea">Długi tekst</option>'+
+                                    '<option value="email">Email</option>'+
+                                    '<option value="number">Numer</option>'+
+                                    '<option value="date">Data</option>'+
+                                '</select>'+
+                            '</div>'+
+                        '</div>';
+
+        $('#rubric_fields').append(new_rubric);
+        rubric_count++;
+
+        // Pokaż przycisk usuwania rubryki, jeśli jest więcej niż jedna rubryka
+        if (rubric_count > 1) {
+            $('#remove_rubric').show();
+        }
+    });
+
+    // Obsługa usuwania rubryk
+    $(document).on('click', '#remove_rubric', function() {
+        $('#rubric_fields .form-group:last').remove();
+        rubric_count--;
+
+        // Ukryj przycisk usuwania rubryki, jeśli zostanie tylko jedna rubryka
+        if (rubric_count === 1) {
+            $(this).hide();
+        }
+    });
+</script>
+
+
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the form element
+        var form = document.querySelector('.form-with-validation');
+        
+        // Add event listener for form submission
+        form.addEventListener('submit', function(event) {
+            // Check if the form is valid
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Add the was-validated class to the form to show validation feedback
+            form.classList.add('was-validated');
+        }, false);
+    });
+</script>
+{% endblock %}

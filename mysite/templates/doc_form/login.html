@@ -1,0 +1,20 @@
+<!-- form_template.html -->
+
+{% extends 'doc_form/base.html' %}
+{% block title %}Logowanie{% endblock %}
+
+{% block content %}
+
+<!-- Dodaj link do pliku CSS Bootstrap -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container">
+    <h1>Zaloguj się!</h1>
+    <form class="form-with-validation" method="POST">
+        {% csrf_token %}
+        {{ form }}
+        <button class="btn btn-primary">Zaloguj</button>
+    </form>
+</div>
+
+{% endblock %}

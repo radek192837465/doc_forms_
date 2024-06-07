@@ -1,0 +1,58 @@
+<!-- base.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Moja Aplikacja{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'index' %}">Aplikacja</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'index' %}">Strona główna</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'form_new_doc_view' %}">Dodaj nowy dokument</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <p class="nav-link active">👨‍🦲 {{user.username}}</p>
+                    </li>
+                    {% endif %}
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register_view' %}">Zarejestruj</a>
+                    </li>
+                    {% endif %}
+                    {% if not user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login_view' %}">Zalogouj</a>
+                    </li>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <li class="nav-item" style="margin: 0; padding: 0;">
+                        <form action="{% url 'logout_view' %}" method="post" style="margin: 0; padding: 0;">
+                            {% csrf_token %}
+                            <button class="btn nav-link">Wyloguj</button>
+                        </form>
+                    </li>
+                    {% endif %}
+                <!-- Dodaj więcej opcji nawigacji w razie potrzeby -->
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
